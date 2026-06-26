@@ -34,56 +34,26 @@ const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Jobs", url: "/jobs", icon: Briefcase },
   { title: "Kanban", url: "/kanban", icon: KanbanSquare },
-];
-
-const soonItems = [
   { title: "Calendar", url: "/calendar", icon: Calendar },
+] as const;
+
+const aiItems = [
   { title: "AI Assistant", url: "/assistant", icon: Brain },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
-];
+] as const;
 
 const accountItems = [
   { title: "Profile", url: "/profile", icon: UserIcon },
   { title: "Settings", url: "/settings", icon: Settings },
-];
+] as const;
 
-export function AppSidebar() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+...
 
-  const isActive = (url: string) => pathname === url || pathname.startsWith(url + "/");
-
-  const handleSignOut = async () => {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    toast.success("Signed out");
-    navigate({ to: "/auth", replace: true });
-  };
-
-  const initial = (user?.user_metadata?.full_name as string | undefined)?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? "U";
-
-  return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <Link to="/dashboard" className="flex items-center gap-2 px-2 py-3">
-          <div className="gradient-brand shadow-glow flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-            <Sparkles className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="font-display text-base font-bold tracking-tight group-data-[collapsible=icon]:hidden">
-            Trackr
-          </span>
-        </Link>
-      </SidebarHeader>
-
-      <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupLabel>Intelligence</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
+              {aiItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                     <Link to={item.url}>
@@ -98,38 +68,16 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Coming soon</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {soonItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    onClick={() => toast.info(`${item.title} is coming in the next phase.`)}
-                    className="text-muted-foreground opacity-70"
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {accountItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    onClick={() => toast.info(`${item.title} is coming in the next phase.`)}
-                    className="text-muted-foreground opacity-70"
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                    <Link to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
