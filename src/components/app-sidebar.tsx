@@ -47,43 +47,64 @@ const accountItems = [
   { title: "Settings", url: "/settings", icon: Settings },
 ] as const;
 
-...
+export function AppSidebar() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Intelligence</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {aiItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+  const isActive = (url: string) => pathname === url || pathname.startsWith(url + "/");
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {accountItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+  const handleSignOut = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    toast.success("Signed out");
+    navigate({ to: "/auth", replace: true });
+  };
+
+  const initial =
+    (user?.user_metadata?.full_name as string | undefined)?.[0]?.toUpperCase() ??
+    user?.email?.[0]?.toUpperCase() ??
+    "U";
+
+  const renderGroup = (label: string, items: ReadonlyArray<{ title: string; url: string; icon: typeof LayoutDashboard }>) => (
+    <SidebarGroup>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.url}>
+              <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                <Link to={item.url}>
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+
+  return (
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <Link to="/dashboard" className="flex items-center gap-2 px-2 py-3">
+          <div className="gradient-brand shadow-glow flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+            <Sparkles className="h-4 w-4 text-primary-foreground" />
+          </div>
+          <span className="font-display text-base font-bold tracking-tight group-data-[collapsible=icon]:hidden">
+            Trackr
+          </span>
+        </Link>
+      </SidebarHeader>
+
+      <SidebarContent>
+        {renderGroup("Workspace", mainItems)}
+        {renderGroup("Intelligence", aiItems)}
+        {renderGroup("Account", accountItems)}
       </SidebarContent>
 
       <SidebarFooter>
